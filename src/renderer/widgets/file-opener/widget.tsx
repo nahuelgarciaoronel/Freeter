@@ -12,7 +12,7 @@ import { useCallback } from 'react';
 
 function WidgetComp({settings, widgetApi, sharedState}: WidgetReactComponentProps<Settings>) {
   const { shell } = widgetApi;
-  const { files, folders, type, openIn } = settings;
+  const { files, folders, type, openIn, customIconDataUrl } = settings;
   const {apps} = sharedState.apps;
   const openInApp = openIn !== '' ? apps[openIn] : undefined;
 
@@ -28,16 +28,32 @@ function WidgetComp({settings, widgetApi, sharedState}: WidgetReactComponentProp
     }
   }, [openInApp, paths, shell])
 
-  return paths.length>0
-    ? <Button
-        onClick={onBtnClick}
-        iconSvg={iconSvg}
-        title={`Open ${settingsTypeNamesCapital[settings.type]}${paths.length>1 ? 's' : ''}`}
-        size='Fill'
-      />
-    : <div className={styles['not-configured']}>
+  if (paths.length === 0) {
+    return <div className={styles['not-configured']}>
       {`${settingsTypeNamesCapital[settings.type]}s not specified`}
-    </div>
+    </div>;
+  }
+
+  if (customIconDataUrl) {
+    return <button
+      className={styles['shortcut-button']}
+      onClick={onBtnClick}
+      title={`Open ${settingsTypeNamesCapital[settings.type]}${paths.length>1 ? 's' : ''}`}
+    >
+      <img
+        src={customIconDataUrl}
+        alt="Custom icon"
+        className={styles['shortcut-icon']}
+      />
+    </button>;
+  }
+
+  return <Button
+    onClick={onBtnClick}
+    iconSvg={iconSvg}
+    title={`Open ${settingsTypeNamesCapital[settings.type]}${paths.length>1 ? 's' : ''}`}
+    size='Fill'
+  />;
 }
 
 export const widgetComp: ReactComponent<WidgetReactComponentProps<Settings>> = {

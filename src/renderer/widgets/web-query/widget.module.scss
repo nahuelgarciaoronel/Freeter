@@ -20,3 +20,32 @@
   min-width: 50px;
   flex: 1;
 }
+
+.query-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 2px;
+  background-color: var(--freeter-buttonBackground);
+  cursor: pointer;
+  padding: 5px;
+  height: 30px;
+  width: 30px;
+  box-sizing: border-box;
+
+  &:hover {
+    background-color: var(--freeter-buttonHoverBackground);
+  }
+
+  &:active, &:focus-visible {
+    background-color: var(--freeter-buttonActiveBackground);
+  }
+}
+
+.query-button-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  pointer-events: none;
+}

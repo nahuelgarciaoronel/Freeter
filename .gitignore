@@ -2,7 +2,7 @@
 npm-debug.log
 Thumbs.db
 yarn-error.log
-build/
+# build/
 coverage/
 dist/
 node_modules/

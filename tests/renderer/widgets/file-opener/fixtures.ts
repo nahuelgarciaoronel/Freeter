@@ -12,6 +12,7 @@ export function fixtureSettings(settings: Partial<Settings>): Settings {
     files: ['file/path1', 'file/path2'],
     folders: ['folder/path1', 'folder/path2'],
     type: SettingsType.File,
+    customIconDataUrl: '',
     ...settings
   }
 }

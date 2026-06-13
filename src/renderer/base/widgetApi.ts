@@ -42,6 +42,7 @@ interface WidgetApiModules {
     openApp: (appPath: string, args?: string[]) => Promise<void>;
     openExternalUrl: (url: string) => Promise<void>;
     openPath: (path: string) => Promise<string>;
+    getFileIcon: (path: string) => Promise<string>;
   };
   readonly terminal: {
     execCmdLines: (cmdLines: ReadonlyArray<string>, cwd?: string) => void;
@@ -96,5 +97,6 @@ export interface WidgetSettingsApi<TSettings> {
     showAppManager: () => void;
     showOpenFileDialog: (cfg: OpenFileDialogConfig) => Promise<OpenDialogResult>;
     showOpenDirDialog: (cfg: OpenDirDialogConfig) => Promise<OpenDialogResult>;
+    readFileAsDataUrl: (path: string) => Promise<string>;
   }
 }

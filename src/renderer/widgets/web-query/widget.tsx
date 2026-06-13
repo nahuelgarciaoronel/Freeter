@@ -18,6 +18,7 @@ const replaceQueryPlaceholder = (strWithQuery: string, queryVal: string) => strW
 function WidgetComp({settings, widgetApi}: WidgetReactComponentProps<Settings>) {
   const [typedQuery, setTypedQuery] = useState('');
   const { shell, widgets } = widgetApi;
+  const { customIconDataUrl } = settings;
 
   const {descr, urlTpl, queryTpl, notConfigNotes} = useMemo(() => {
     const engineId = settings.engine;
@@ -94,7 +95,12 @@ function WidgetComp({settings, widgetApi}: WidgetReactComponentProps<Settings>) 
   return notConfigNotes.length===0
     ? <form onSubmit={onQuerySubmit} className={styles['web-query']}>
         <input className={styles['web-query-input']} type='text' placeholder={descr} value={typedQuery} onChange={(e) => setTypedQuery(e.target.value)} />
-        <Button type='submit' iconSvg={querySvg} title='Query' />
+        {customIconDataUrl
+          ? <button type='submit' className={styles['query-button']} title='Query'>
+              <img src={customIconDataUrl} alt='Custom icon' className={styles['query-button-icon']} />
+            </button>
+          : <Button type='submit' iconSvg={querySvg} title='Query' />
+        }
       </form>
     : <div className={styles['not-configured']}>
         {notConfigNotes[0]}

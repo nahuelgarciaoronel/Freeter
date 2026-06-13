@@ -68,6 +68,14 @@ export const ipcShellOpenPathChannel = makeIpcChannelName('shell-open-path');
 export type IpcShellOpenPathArgs = [path: string];
 export type IpcShellOpenPathRes = string;
 
+export const ipcShellGetFileIconChannel = makeIpcChannelName('shell-get-file-icon');
+export type IpcShellGetFileIconArgs = [path: string];
+export type IpcShellGetFileIconRes = string;
+
+export const ipcReadFileAsDataUrlChannel = makeIpcChannelName('read-file-as-data-url');
+export type IpcReadFileAsDataUrlArgs = [path: string];
+export type IpcReadFileAsDataUrlRes = string;
+
 export const ipcWriteBookmarkIntoClipboardChannel = makeIpcChannelName('write-bookmark-into-clipboard');
 export type IpcWriteBookmarkIntoClipboardArgs = [title: string, url: string];
 export type IpcWriteBookmarkIntoClipboardRes = void;
@@ -127,3 +135,15 @@ export type IpcShowBrowserWindowRes = void;
 export const ipcExecCmdLinesInTerminalChannel = makeIpcChannelName('exec-cmd-lines-in-terminal');
 export type IpcExecCmdLinesInTerminalArgs = [cmdLines: ReadonlyArray<string>, cwd?: string];
 export type IpcExecCmdLinesInTerminalRes = void;
+
+export const ipcLoadCustomThemesChannel = makeIpcChannelName('load-custom-themes');
+export type IpcLoadCustomThemesArgs = [];
+export type IpcLoadCustomThemesRes = { id: string; name: string; author: string; tokens: Record<string, string> }[];
+
+export const ipcWriteTextToFileChannel = makeIpcChannelName('write-text-to-file');
+export type IpcWriteTextToFileArgs = [filePath: string, text: string];
+export type IpcWriteTextToFileRes = void;
+
+export const ipcReadTextFromFileChannel = makeIpcChannelName('read-text-from-file');
+export type IpcReadTextFromFileArgs = [filePath: string];
+export type IpcReadTextFromFileRes = string;

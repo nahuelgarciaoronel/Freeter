@@ -14,10 +14,17 @@ import { OpenAboutUseCase } from '@/application/useCases/about/openAbout';
 import { ShellProvider } from '@/application/interfaces/shellProvider';
 import { OpenProjectManagerUseCase } from '@/application/useCases/projectManager/openProjectManager';
 import { OpenAppManagerUseCase } from '@/application/useCases/appManager/openAppManager';
+import { ExportSettingsUseCase } from '@/application/useCases/settingsBackup/exportSettings';
+import { ImportSettingsUseCase } from '@/application/useCases/settingsBackup/importSettings';
 import { EditTogglePos, ProjectSwitcherPos } from '@/base/state/ui';
 import { ToggleTopBarUseCase } from '@/application/useCases/toggleTopBar';
 import { SetProjectSwitcherPositionUseCase } from '@/application/useCases/projectSwitcher/setProjectSwitcherPosition';
 import { SetEditTogglePositionUseCase } from '@/application/useCases/setEditTogglePosition';
+import { KeyboardShortcutOverrides, resolveShortcutAccelerator, shortcutIdOpenSettings, shortcutIdToggleEditMode } from '@/base/keyboardShortcuts';
+
+function acceleratorProp(accelerator: string): { accelerator?: string } {
+  return accelerator ? { accelerator } : {};
+}
 
 const urlDownload = 'https://freeter.io/v2/download';
 const urlTwitter = 'https://twitter.com/FreeterApp';
@@ -39,6 +46,8 @@ type Deps = {
   openAboutUseCase: OpenAboutUseCase;
   openProjectManagerUseCase: OpenProjectManagerUseCase;
   openAppManagerUseCase: OpenAppManagerUseCase;
+  exportSettingsUseCase: ExportSettingsUseCase;
+  importSettingsUseCase: ImportSettingsUseCase;
 }
 
 
@@ -56,6 +65,8 @@ export function createInitAppMenuUseCase({
   openAboutUseCase,
   openProjectManagerUseCase,
   openAppManagerUseCase,
+  exportSettingsUseCase,
+  importSettingsUseCase,
 }: Deps) {
   const { isMac, isDevMode } = processProvider.getProcessInfo();
 
@@ -63,11 +74,11 @@ export function createInitAppMenuUseCase({
     type: 'separator'
   }
 
-  const itemSettings: MenuItem = {
-    accelerator: 'CmdOrCtrl+,',
+  const createItemSettings: (shortcuts: KeyboardShortcutOverrides | undefined) => MenuItem = (shortcuts) => ({
+    ...acceleratorProp(resolveShortcutAccelerator(shortcutIdOpenSettings, shortcuts)),
     doAction: async () => openApplicationSettingsUseCase(),
     label: 'Settings'
-  };
+  });
 
   const itemAbout: MenuItem = {
     label: 'About Freeter',
@@ -83,12 +94,25 @@ export function createInitAppMenuUseCase({
     role: 'quit'
   }
 
-  const menuApp: MenuItem = {
+  const itemExportSettings: MenuItem = {
+    label: 'Export Settings...',
+    doAction: async () => exportSettingsUseCase()
+  };
+
+  const itemImportSettings: MenuItem = {
+    label: 'Import Settings...',
+    doAction: async () => { void importSettingsUseCase(); }
+  };
+
+  const createMenuApp: (shortcuts: KeyboardShortcutOverrides | undefined) => MenuItem = (shortcuts) => ({
     label: 'Freeter',
     submenu: [
       itemAbout,
       itemSeparator,
-      itemSettings,
+      createItemSettings(shortcuts),
+      itemSeparator,
+      itemExportSettings,
+      itemImportSettings,
       itemSeparator,
       itemCheckUpdates,
       itemSeparator,
@@ -98,24 +122,28 @@ export function createInitAppMenuUseCase({
       itemSeparator,
       itemQuit
     ]
-  }
+  })
 
-  const menuFile: MenuItem = {
+  const createMenuFile: (shortcuts: KeyboardShortcutOverrides | undefined) => MenuItem = (shortcuts) => ({
     label: '&File',
     submenu: [
-      itemSettings,
+      createItemSettings(shortcuts),
+      itemSeparator,
+      itemExportSettings,
+      itemImportSettings,
       itemSeparator,
       itemQuit
     ]
-  }
+  })
 
   const createMenuEdit: (
     editMode: boolean,
-  ) => MenuItem = (editMode) => ({
+    shortcuts: KeyboardShortcutOverrides | undefined,
+  ) => MenuItem = (editMode, shortcuts) => ({
     label: '&Edit',
     submenu: [
       {
-        accelerator: 'CmdOrCtrl+E',
+        ...acceleratorProp(resolveShortcutAccelerator(shortcutIdToggleEditMode, shortcuts)),
         label: `${editMode ? 'Disable' : 'Enable'} Edit Mode`,
         doAction: async () => toggleEditModeUseCase()
       },
@@ -298,18 +326,20 @@ export function createInitAppMenuUseCase({
       topBar: state.ui.topBar,
       prjSwitcherPos: state.ui.projectSwitcher.pos,
       editTogglePos: state.ui.editTogglePos,
+      shortcuts: state.ui.appConfig.shortcuts,
     }), ({
       isLoading,
       editMode,
       menuBar,
       topBar,
       prjSwitcherPos,
-      editTogglePos
+      editTogglePos,
+      shortcuts
     }) => {
       if (!isLoading) {
         appMenu.setMenu([
-          (isMac ? menuApp : menuFile),
-          createMenuEdit(editMode),
+          (isMac ? createMenuApp(shortcuts) : createMenuFile(shortcuts)),
+          createMenuEdit(editMode, shortcuts),
           createMenuView(menuBar, topBar, prjSwitcherPos, editTogglePos),
           menuHelp,
           ...(isDevMode

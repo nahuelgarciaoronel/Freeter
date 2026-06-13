@@ -1,0 +1,23 @@
+/*
+ * Copyright: (c) 2024, Alex Kaul
+ * GNU General Public License v3.0 or later (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+ */
+
+.shortcut-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.shortcut-input-field {
+  min-width: 160px;
+  cursor: pointer;
+}
+
+.shortcut-input-field.recording {
+  outline: 2px solid var(--freeter-outline);
+}
+
+.shortcut-input-clear {
+  flex: none;
+}

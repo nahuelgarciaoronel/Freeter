@@ -3,7 +3,7 @@
  * GNU General Public License v3.0 or later (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
  */
 
-import { ipcShellOpenAppChannel, ipcShellOpenExternalUrlChannel, ipcShellOpenPathChannel } from '@common/ipc/channels';
+import { ipcShellOpenAppChannel, ipcShellOpenExternalUrlChannel, ipcShellOpenPathChannel, ipcReadFileAsDataUrlChannel } from '@common/ipc/channels';
 import { createShellProvider } from '@/infra/shellProvider/shellProvider';
 import { electronIpcRenderer } from '@/infra/mainApi/mainApi';
 
@@ -46,6 +46,18 @@ describe('ShellProvider', () => {
 
       expect(electronIpcRenderer.invoke).toHaveBeenCalledTimes(1);
       expect(electronIpcRenderer.invoke).toHaveBeenCalledWith(ipcShellOpenPathChannel, testPath);
+    })
+  })
+
+  describe('readFileAsDataUrl', () => {
+    it('should send a message to the main process via a right ipc channel with right args', async () => {
+      const testPath = 'some/image.png';
+      const shellProvider = createShellProvider();
+
+      await shellProvider.readFileAsDataUrl(testPath);
+
+      expect(electronIpcRenderer.invoke).toHaveBeenCalledTimes(1);
+      expect(electronIpcRenderer.invoke).toHaveBeenCalledWith(ipcReadFileAsDataUrlChannel, testPath);
     })
   })
 });

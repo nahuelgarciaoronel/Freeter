@@ -3,7 +3,7 @@
  * GNU General Public License v3.0 or later (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
  */
 
-import { CreateSettingsState, ReactComponent, SettingsEditorReactComponentProps, SettingBlock } from '@/widgets/appModules';
+import { Button, CreateSettingsState, ReactComponent, SettingsEditorReactComponentProps, SettingBlock, SettingRow, browse14Svg, delete14Svg } from '@/widgets/appModules';
 
 export enum SettingsMode {
   Browser = 1,
@@ -60,6 +60,7 @@ export interface Settings {
   descr: string;
   query: string;
   url: string;
+  customIconDataUrl: string;
 }
 
 export const createSettingsState: CreateSettingsState<Settings> = (settings) => {
@@ -101,12 +102,13 @@ export const createSettingsState: CreateSettingsState<Settings> = (settings) => 
     engine,
     descr,
     url,
-    query: typeof settings.query === 'string' ? settings.query : ''
+    query: typeof settings.query === 'string' ? settings.query : '',
+    customIconDataUrl: typeof settings.customIconDataUrl === 'string' ? settings.customIconDataUrl : ''
   }
 }
 
 function SettingsEditorComp({settings, settingsApi}: SettingsEditorReactComponentProps<Settings>) {
-  const {updateSettings} = settingsApi;
+  const {updateSettings, dialog} = settingsApi;
 
   function updMode(newModeId: string) {
     const val = Number.parseInt(newModeId);
@@ -241,6 +243,46 @@ Make sure that any Webpage widget you want to use for queries includes the capit
             placeholder="Type a query template"
           />
         }
+      </SettingBlock>
+
+      <SettingBlock
+        titleForId='web-query-icon'
+        title='Custom Icon'
+        moreInfo='Select an image (PNG, SVG, ICO) to use as the widget icon.'
+      >
+        <SettingRow>
+          <Button
+            onClick={async () => {
+              const { canceled, filePaths } = await dialog.showOpenFileDialog({
+                title: 'Select Icon Image',
+                filters: [{ name: 'Images', extensions: ['png', 'svg', 'ico', 'jpg', 'jpeg', 'webp'] }],
+                multiSelect: false
+              });
+              if (!canceled && filePaths[0]) {
+                const dataUrl = await dialog.readFileAsDataUrl(filePaths[0]);
+                updateSettings({ ...settings, customIconDataUrl: dataUrl });
+              }
+            }}
+            caption={settings.customIconDataUrl ? 'Change Icon' : 'Select Icon'}
+            iconSvg={browse14Svg}
+          />
+          {settings.customIconDataUrl && (
+            <Button
+              onClick={() => updateSettings({ ...settings, customIconDataUrl: '' })}
+              caption='Remove'
+              iconSvg={delete14Svg}
+            />
+          )}
+        </SettingRow>
+        {settings.customIconDataUrl && (
+          <div style={{ marginTop: '8px', textAlign: 'center' }}>
+            <img
+              src={settings.customIconDataUrl}
+              alt="Custom icon preview"
+              style={{ maxWidth: '48px', maxHeight: '48px', objectFit: 'contain' }}
+            />
+          </div>
+        )}
       </SettingBlock>
     </>
   )

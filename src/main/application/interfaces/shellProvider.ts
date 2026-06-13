@@ -6,4 +6,5 @@
 export interface ShellProvider {
   openExternal: (url: string) => Promise<void>;
   openPath: (path: string) => Promise<string>;
+  getFileIcon: (path: string) => Promise<string>;
 }

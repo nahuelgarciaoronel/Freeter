@@ -9,6 +9,10 @@ import { ShellProvider } from '@/application/interfaces/shellProvider';
 export function createShellProvider(): ShellProvider {
   return {
     openExternal: (url) => Electron.shell.openExternal(url),
-    openPath: (path) => Electron.shell.openPath(path)
+    openPath: (path) => Electron.shell.openPath(path),
+    getFileIcon: async (path) => {
+      const icon = await Electron.app.getFileIcon(path, { size: 'large' });
+      return icon.toDataURL();
+    }
   }
 }

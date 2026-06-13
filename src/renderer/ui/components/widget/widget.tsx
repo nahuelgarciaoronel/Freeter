@@ -24,6 +24,7 @@ export function createWidgetComponent({
       widget,
       actionBarItems,
       widgetName,
+      hideTitle,
       widgetApi,
       WidgetComp,
       sharedState,
@@ -45,17 +46,25 @@ export function createWidgetComponent({
       )
     }
 
+    const showHeader = editMode || !hideTitle;
+
     return <div
-      className={clsx(styles.widget, dontShowActionBar && styles['dont-show-action-bar'])}
+      className={clsx(
+        styles.widget,
+        dontShowActionBar && styles['dont-show-action-bar'],
+        !showHeader && styles['without-header']
+      )}
       onContextMenu={onContextMenuHandler}
     >
-      <div className={styles['widget-header']}>
-        <div className={styles['widget-header-name']}>{widgetName}</div>
-        <ActionBar
-          actionBarItems={actionBarItems}
-          className={styles['widget-header-action-bar']}
-        ></ActionBar>
-      </div>
+      {showHeader &&
+        <div className={styles['widget-header']}>
+          <div className={styles['widget-header-name']}>{widgetName}</div>
+          <ActionBar
+            actionBarItems={actionBarItems}
+            className={styles['widget-header-action-bar']}
+          ></ActionBar>
+        </div>
+      }
       <div className={styles['widget-body']} data-widget-context="" {...{ inert: editMode ? true : undefined }}>
         <WidgetComp id={widget.id} env={env} settings={widget.settings} widgetApi={widgetApi} sharedState={sharedState}></WidgetComp>
       </div>

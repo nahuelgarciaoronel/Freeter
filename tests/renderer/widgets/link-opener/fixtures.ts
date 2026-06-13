@@ -8,6 +8,7 @@ import { Settings } from '@/widgets/link-opener/settings';
 export function fixtureSettings(settings: Partial<Settings>): Settings {
   return {
     urls: ['some://url1', 'some://url2'],
+    customIconDataUrl: '',
     ...settings
   }
 }

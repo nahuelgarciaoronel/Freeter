@@ -64,7 +64,8 @@ function _createWidgetApiFactory({
       shell: () => ({
         openApp: (appPath, args) => shellProvider.openApp(appPath, args),
         openExternalUrl: (url) => shellProvider.openExternal(url),
-        openPath: (path) => shellProvider.openPath(path)
+        openPath: (path) => shellProvider.openPath(path),
+        getFileIcon: (path) => shellProvider.getFileIcon(path)
       }),
       terminal: () => ({
         execCmdLines: (cmdLines, cwd) => terminalProvider.execCmdLines(cmdLines, cwd)

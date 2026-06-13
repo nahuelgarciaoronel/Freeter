@@ -4,6 +4,7 @@
  */
 
 import { ApplicationSettingsViewModelHook } from '@/ui/components/applicationSettings/applicationSettingsViewModel';
+import { ShortcutInput } from '@/ui/components/applicationSettings/shortcutInput';
 import clsx from 'clsx';
 import styles from './applicationSettings.module.scss';
 import settingsScreenStyles from '@/ui/components/basic/settingsScreen/settingsScreen.module.scss'
@@ -25,11 +26,13 @@ export function createApplicationSettingsComponent({
       appConfig,
       hotkeyOptions,
       updateSettings,
+      updateShortcut,
       onOkClickHandler,
       onCancelClickHandler,
       uiThemeOptions,
       inactiveAfterOptions,
-      activateOnProjectSwitchOptions
+      activateOnProjectSwitchOptions,
+      keyboardShortcuts
     } = useApplicationSettingsViewModel();
 
     if (appConfig) {
@@ -49,6 +52,26 @@ export function createApplicationSettingsComponent({
                 <option key={item.value} value={item.value}>{item.caption}</option>
               ))}
             </select>
+          </SettingBlock>
+
+          <SettingBlock
+            titleForId='keyboard-shortcuts'
+            title='Keyboard Shortcuts'
+            moreInfo='Configure the keyboard shortcuts for common actions inside Freeter. Click a field and press the desired key combination to set it. Click Clear to remove a shortcut.'
+          >
+            {keyboardShortcuts.map(shortcut => (
+              <SettingBlock
+                key={shortcut.id}
+                titleForId={`shortcut-${shortcut.id}`}
+                title={shortcut.label}
+                moreInfo={shortcut.scope === 'global' ? 'Global shortcut' : 'Local shortcut'}
+              >
+                <ShortcutInput
+                  value={shortcut.value}
+                  onChange={value => updateShortcut(shortcut.id, value)}
+                />
+              </SettingBlock>
+            ))}
           </SettingBlock>
 
           <SettingBlock

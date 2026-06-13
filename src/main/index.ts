@@ -4,6 +4,7 @@
  */
 
 import { join } from 'node:path';
+import { mkdirSync } from 'node:original-fs';
 import { hostFreeterApp, schemeFreeterFile } from '@common/infra/network';
 import { channelPrefix } from '@common/ipc/ipc';
 import { createIpcMain } from '@/infra/ipcMain/ipcMain';
@@ -69,6 +70,14 @@ import { createChildProcessProvider } from '@/infra/childProcessProvider/childPr
 import { createOpenPathUseCase } from '@/application/useCases/shell/openPath';
 import { createCopyWidgetDataStorageUseCase } from '@/application/useCases/widgetDataStorage/copyWidgetDataStorage';
 import { createOpenAppUseCase } from '@/application/useCases/shell/openApp';
+import { createGetFileIconUseCase } from '@/application/useCases/shell/getFileIcon';
+import { createReadFileAsDataUrlUseCase } from '@/application/useCases/shell/readFileAsDataUrl';
+import { createCustomThemesControllers } from '@/controllers/customThemes';
+import { createLoadCustomThemesUseCase } from '@/application/useCases/customThemes/loadCustomThemes';
+import { createFileSystemControllers } from '@/controllers/fileSystem';
+import { createWriteTextToFileUseCase } from '@/application/useCases/fileSystem/writeTextToFile';
+import { createReadTextFromFileUseCase } from '@/application/useCases/fileSystem/readTextFromFile';
+import { createSeedUserDataUseCase } from '@/application/useCases/seed/seedUserData';
 
 let appWindow: BrowserWindow | null = null; // ref to the app window
 
@@ -123,7 +132,21 @@ if (!app.requestSingleInstanceLock()) {
     const ipcMainEventValidator = createIpcMainEventValidator(channelPrefix, hostFreeterApp);
     const ipcMain = createIpcMain(ipcMainEventValidator);
 
-    const appDataStorage = await createFileDataStorage('string', join(app.getPath('appData'), 'freeter2', 'freeter-data'));
+    const themesDir = join(app.getPath('appData'), 'freeter2', 'themes');
+    mkdirSync(themesDir, { recursive: true });
+
+    const freeterDataDir = join(app.getPath('appData'), 'freeter2', 'freeter-data');
+
+    // Seed bundled user_config/themes (from the install directory) into the
+    // user's appData on first launch, without overwriting existing files.
+    const seedBaseDir = app.isPackaged ? process.resourcesPath : app.getAppPath();
+    const seedUserDataUseCase = createSeedUserDataUseCase([
+      { srcDir: join(seedBaseDir, 'themes'), destDir: themesDir },
+      { srcDir: join(seedBaseDir, 'user_config'), destDir: freeterDataDir }
+    ]);
+    seedUserDataUseCase();
+
+    const appDataStorage = await createFileDataStorage('string', freeterDataDir);
     const getTextFromAppDataStorageUseCase = createGetTextFromAppDataStorageUseCase({ appDataStorage });
     const setTextInAppDataStorageUseCase = createSetTextInAppDataStorageUseCase({ appDataStorage });
 
@@ -149,6 +172,8 @@ if (!app.requestSingleInstanceLock()) {
     const shellProvider = createShellProvider();
     const openExternalUrlUseCase = createOpenExternalUrlUseCase({ shellProvider });
     const openPathUseCase = createOpenPathUseCase({ shellProvider })
+    const getFileIconUseCase = createGetFileIconUseCase({ shellProvider })
+    const readFileAsDataUrlUseCase = createReadFileAsDataUrlUseCase()
 
     const getProcessInfoUseCase = createGetProcessInfoUseCase({ processProvider });
     const { isLinux } = await getProcessInfoUseCase();
@@ -176,6 +201,9 @@ if (!app.requestSingleInstanceLock()) {
     const execCmdLinesInTerminalUseCase = createExecCmdLinesInTerminalUseCase({ appsProvider, childProcessProvider, processProvider })
 
     const openAppUseCase = createOpenAppUseCase({ childProcessProvider, processProvider })
+    const loadCustomThemesUseCase = createLoadCustomThemesUseCase(themesDir)
+    const writeTextToFileUseCase = createWriteTextToFileUseCase()
+    const readTextFromFileUseCase = createReadTextFromFileUseCase()
 
     registerControllers(ipcMain, [
       ...createAppDataStorageControllers({ getTextFromAppDataStorageUseCase, setTextInAppDataStorageUseCase }),
@@ -189,7 +217,7 @@ if (!app.requestSingleInstanceLock()) {
       }),
       ...createContextMenuControllers({ popupContextMenuUseCase }),
       ...createClipboardControllers({ writeBookmarkIntoClipboardUseCase, writeTextIntoClipboardUseCase }),
-      ...createShellControllers({ openExternalUrlUseCase, openPathUseCase, openAppUseCase }),
+      ...createShellControllers({ openExternalUrlUseCase, openPathUseCase, openAppUseCase, getFileIconUseCase, readFileAsDataUrlUseCase }),
       ...createProcessControllers({ getProcessInfoUseCase }),
       ...createDialogControllers({
         showMessageBoxUseCase: dialogShowMessageBoxUseCase,
@@ -201,7 +229,9 @@ if (!app.requestSingleInstanceLock()) {
       ...createGlobalShortcutControllers({ setMainShortcutUseCase }),
       ...createTrayMenuControllers({ setTrayMenuUseCase }),
       ...createBrowserWindowControllers({ showBrowserWindowUseCase }),
-      ...createTerminalControllers({ execCmdLinesInTerminalUseCase })
+      ...createTerminalControllers({ execCmdLinesInTerminalUseCase }),
+      ...createCustomThemesControllers({ loadCustomThemesUseCase }),
+      ...createFileSystemControllers({ writeTextToFileUseCase, readTextFromFileUseCase })
     ])
 
     const [windowStore] = createWindowStore({

@@ -43,6 +43,9 @@ import { createToggleEditModeUseCase } from '@/application/useCases/toggleEditMo
 import { createToggleMenuBarUseCase } from '@/application/useCases/toggleMenuBar';
 import { createAppStore } from '@/data/appStore';
 import { createAppState } from '@/base/state/app';
+import { electronIpcRenderer } from '@/infra/mainApi/mainApi';
+import { ipcLoadCustomThemesChannel, IpcLoadCustomThemesArgs, IpcLoadCustomThemesRes } from '@common/ipc/channels';
+import { registerCustomThemes } from '@/ui/components/app/uiTheme/themeRegistry';
 import { entityStateActions } from '@/base/state/actions';
 import { createAppStateHook } from '@/ui/hooks/appState';
 import { createAppStateStorage } from '@/data/appStateStorage';
@@ -92,6 +95,9 @@ import { createInitMainShortcutUseCase } from '@/application/useCases/globalShor
 import { createGlobalShortcutProvider } from '@/infra/globalShortcut/globalShortcutProvider';
 import { createApplicationSettingsComponent, createApplicationSettingsViewModelHook } from '@/ui/components/applicationSettings';
 import { createGetMainHotkeyOptionsUseCase } from '@/application/useCases/applicationSettings/getMainHotkeyOptions';
+import { createExportSettingsUseCase } from '@/application/useCases/settingsBackup/exportSettings';
+import { createImportSettingsUseCase } from '@/application/useCases/settingsBackup/importSettings';
+import { createFileSystemProvider } from '@/infra/fileSystemProvider/fileSystemProvider';
 import { createOpenApplicationSettingsUseCase } from '@/application/useCases/applicationSettings/openApplicationSettings';
 import { createCloseApplicationSettingsUseCase } from '@/application/useCases/applicationSettings/closeApplicationSettings';
 import { createSaveApplicationSettingsUseCase } from '@/application/useCases/applicationSettings/saveApplicationSettings';
@@ -173,6 +179,9 @@ function createStore() {
 }
 
 async function createUseCases(store: ReturnType<typeof createStore>) {
+  const customThemes = await electronIpcRenderer.invoke<IpcLoadCustomThemesArgs, IpcLoadCustomThemesRes>(ipcLoadCustomThemesChannel);
+  registerCustomThemes(customThemes);
+
   const deps = {
     appStore: store.appStore,
     idGenerator: uuidv4IdGenerator,
@@ -181,6 +190,7 @@ async function createUseCases(store: ReturnType<typeof createStore>) {
   const openAppManagerUseCase = createOpenAppManagerUseCase(deps);
 
   const osDialogProvider = createOsDialogProvider();
+  const shellProvider = createShellProvider();
 
   const openWidgetSettingsUseCase = createOpenWidgetSettingsUseCase(deps);
   const closeWidgetSettingsUseCase = createCloseWidgetSettingsUseCase(deps);
@@ -188,6 +198,7 @@ async function createUseCases(store: ReturnType<typeof createStore>) {
   const getWidgetSettingsApiUseCase = createGetWidgetSettingsApiUseCase({
     ...deps,
     dialogProvider: osDialogProvider,
+    shellProvider,
     openAppManagerUseCase
   });
   const updateWidgetCoreSettingsUseCase = createUpdateWidgetCoreSettingsUseCase(deps);
@@ -251,7 +262,6 @@ async function createUseCases(store: ReturnType<typeof createStore>) {
   const getWidgetsInCurrentWorkflowUseCase = createGetWidgetsInCurrentWorkflowUseCase(deps);
 
   const clipboardProvider = createClipboardProvider();
-  const shellProvider = createShellProvider();
   const processProvider = await createProcessProvider();
   const widgetDataStorageManager = createObjectManager(
     async widgetId => prepareDataStorageForRenderer(createWidgetDataStorage(widgetId)),
@@ -327,6 +337,18 @@ async function createUseCases(store: ReturnType<typeof createStore>) {
   const saveApplicationSettingsUseCase = createSaveApplicationSettingsUseCase(deps);
   const updateApplicationSettingsUseCase = createUpdateApplicationSettingsUseCase(deps);
 
+  const fileSystemProvider = createFileSystemProvider();
+  const exportSettingsUseCase = createExportSettingsUseCase({
+    appStore: deps.appStore,
+    dialog: osDialogProvider,
+    fileSystem: fileSystemProvider
+  });
+  const importSettingsUseCase = createImportSettingsUseCase({
+    appStore: deps.appStore,
+    dialog: osDialogProvider,
+    fileSystem: fileSystemProvider
+  });
+
   const clickAppMenuItemUseCase = createClickAppMenuItemUseCase();
   const appMenuProvider = createAppMenuProvider({
     clickAppMenuItemUseCase
@@ -344,7 +366,9 @@ async function createUseCases(store: ReturnType<typeof createStore>) {
     openApplicationSettingsUseCase,
     openAboutUseCase,
     openAppManagerUseCase,
-    openProjectManagerUseCase
+    openProjectManagerUseCase,
+    exportSettingsUseCase,
+    importSettingsUseCase
   });
 
   const browserWindow = createBrowserWindowProvider();
@@ -507,6 +531,9 @@ async function createUseCases(store: ReturnType<typeof createStore>) {
     closeApplicationSettingsUseCase,
     saveApplicationSettingsUseCase,
     updateApplicationSettingsUseCase,
+
+    exportSettingsUseCase,
+    importSettingsUseCase,
 
     showBrowserWindowUseCase,
 

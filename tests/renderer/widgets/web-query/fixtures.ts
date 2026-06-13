@@ -12,6 +12,7 @@ export function fixtureSettings(settings: Partial<Settings>): Settings {
     mode: SettingsMode.Browser,
     query: '',
     url: '',
+    customIconDataUrl: '',
     ...settings
   }
 }

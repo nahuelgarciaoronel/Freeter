@@ -64,6 +64,7 @@ export function setupSettingsSut<T>(reactComp: ReactComponent<SettingsEditorReac
             showOpenDirDialog: jest.fn(),
             showOpenFileDialog: jest.fn(),
             showAppManager: jest.fn(),
+            readFileAsDataUrl: jest.fn().mockResolvedValue(''),
             ...mockSettingsApi.dialog
           }
         }}
@@ -114,6 +115,7 @@ export function setupWidgetSut<T>(reactComp: ReactComponent<WidgetReactComponent
       openApp: jest.fn(),
       openExternalUrl: jest.fn(),
       openPath: jest.fn(),
+      getFileIcon: jest.fn().mockResolvedValue(''),
       ...mockWidgetApi.shell
     },
     terminal: {

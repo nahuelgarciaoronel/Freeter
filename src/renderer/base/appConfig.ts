@@ -4,9 +4,11 @@
  */
 
 import { MemSaverConfigApp } from '@/base/memSaver';
+import { KeyboardShortcutOverrides } from '@/base/keyboardShortcuts';
 
 export interface AppConfig {
   mainHotkey: string;
   memSaver: MemSaverConfigApp;
   uiTheme: string;
+  shortcuts?: KeyboardShortcutOverrides;
 }

@@ -13,6 +13,7 @@ export default tseslint.config(
       'webpack.main.config.js',
       'webpack.preload.config.js',
       'webpack.renderer.config.js',
+      'electron-builder.config.js',
     ],
     rules: {
       quotes: ['error', 'single', {

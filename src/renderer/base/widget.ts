@@ -10,6 +10,7 @@ import { MenuItem, MenuItemRole } from '@common/base/menu';
 
 export interface WidgetCoreSettings {
   readonly name: string;
+  readonly hideTitle?: boolean;
 }
 
 export type WidgetSettings = Record<string, unknown>;

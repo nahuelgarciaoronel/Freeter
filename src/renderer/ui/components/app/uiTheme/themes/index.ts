@@ -1,10 +1,8 @@
-import { UiThemeId } from '@/base/uiTheme';
-import { darkTheme } from '@/ui/components/app/uiTheme/themes/dark';
-import { lightTheme } from '@/ui/components/app/uiTheme/themes/light';
+import { getThemeTokens } from '@/ui/components/app/uiTheme/themeRegistry';
 
-type UiTheme = typeof darkTheme;
+export { getThemeTokens, getAvailableThemes, registerCustomThemes, isValidThemeId } from '@/ui/components/app/uiTheme/themeRegistry';
 
-export const uiThemes: Record<UiThemeId, UiTheme> = {
-  'dark': darkTheme,
-  'light': lightTheme
+// Re-export for backward compatibility
+export function getThemeById(id: string): Record<string, string> {
+  return getThemeTokens(id) || getThemeTokens('light')!;
 }

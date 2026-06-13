@@ -10,19 +10,35 @@ import styles from './widget.module.scss';
 
 function WidgetComp({settings, widgetApi}: WidgetReactComponentProps<Settings>) {
   const { terminal } = widgetApi;
-  const { cwd} = settings;
+  const { cwd, customIconDataUrl } = settings;
   const cmds = settings.cmds.filter(cmd=>cmd!=='');
 
-  return cmds.length>0
-    ? <Button
-        onClick={_ => terminal.execCmdLines(cmds, cwd !== '' ? cwd : undefined )}
-        iconSvg={execCommandSvg}
-        title={`Execute Command-line${cmds.length>1 ? 's' : ''}`}
-        size='Fill'
-      />
-    : <div className={styles['not-configured']}>
+  if (cmds.length === 0) {
+    return <div className={styles['not-configured']}>
       Command-lines not specified.
-    </div>
+    </div>;
+  }
+
+  if (customIconDataUrl) {
+    return <button
+      className={styles['shortcut-button']}
+      onClick={_ => terminal.execCmdLines(cmds, cwd !== '' ? cwd : undefined)}
+      title={`Execute Command-line${cmds.length>1 ? 's' : ''}`}
+    >
+      <img
+        src={customIconDataUrl}
+        alt="Custom icon"
+        className={styles['shortcut-icon']}
+      />
+    </button>;
+  }
+
+  return <Button
+    onClick={_ => terminal.execCmdLines(cmds, cwd !== '' ? cwd : undefined )}
+    iconSvg={execCommandSvg}
+    title={`Execute Command-line${cmds.length>1 ? 's' : ''}`}
+    size='Fill'
+  />;
 }
 
 export const widgetComp: ReactComponent<WidgetReactComponentProps<Settings>> = {

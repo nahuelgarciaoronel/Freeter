@@ -4,6 +4,7 @@
  */
 
 import { DialogProvider } from '@/application/interfaces/dialogProvider';
+import { ShellProvider } from '@/application/interfaces/shellProvider';
 import { createGetWidgetSettingsApiUseCase } from '@/application/useCases/widgetSettings/getWidgetSettingsApi';
 import { AppState } from '@/base/state/app';
 import { OpenDialogResult, OpenDirDialogConfig, OpenFileDialogConfig } from '@common/base/dialog';
@@ -23,16 +24,26 @@ async function setup(initState: AppState) {
     showSaveFileDialog: jest.fn(),
   }
 
+  const shellProvider: jest.MockedObject<ShellProvider> = {
+    openApp: jest.fn(),
+    openExternal: jest.fn(),
+    openPath: jest.fn(),
+    getFileIcon: jest.fn(),
+    readFileAsDataUrl: jest.fn(),
+  }
+
   const openAppManagerUseCase = jest.fn();
 
   const getWidgetSettingsApiUseCase = createGetWidgetSettingsApiUseCase({
     appStore,
     dialogProvider,
+    shellProvider,
     openAppManagerUseCase
   });
   return {
     appStore,
     dialogProvider,
+    shellProvider,
     openAppManagerUseCase,
     getWidgetSettingsApiUseCase
   }
@@ -128,6 +139,7 @@ describe('getWidgetSettingsApiUseCase()', () => {
     const {
       getWidgetSettingsApiUseCase,
       dialogProvider,
+      shellProvider,
       openAppManagerUseCase
     } = await setup(fixtureAppState({}))
 
@@ -150,5 +162,11 @@ describe('getWidgetSettingsApiUseCase()', () => {
     expect(openAppManagerUseCase).not.toHaveBeenCalled();
     settingsApi.dialog.showAppManager();
     expect(openAppManagerUseCase).toHaveBeenCalledTimes(1);
+
+    const dataUrl = 'data:image/png;base64,abc';
+    shellProvider.readFileAsDataUrl.mockResolvedValue(dataUrl);
+    expect(await settingsApi.dialog.readFileAsDataUrl('some/path.png')).toBe(dataUrl);
+    expect(shellProvider.readFileAsDataUrl).toHaveBeenCalledTimes(1);
+    expect(shellProvider.readFileAsDataUrl).toHaveBeenCalledWith('some/path.png');
   })
 })

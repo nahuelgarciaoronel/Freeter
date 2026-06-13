@@ -18,6 +18,11 @@ $fontSizeL: 16px;
   box-sizing: border-box;
   white-space: nowrap;
   border: $borderSize solid transparent;
+  &:not(.only-caption):not(.only-icon) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
   &:not(.primary) {
     background-color: var(--freeter-buttonBackground);
     color: var(--freeter-buttonColor);

@@ -63,3 +63,7 @@
   bottom: 0;
   overflow: hidden;
 }
+
+.widget.without-header .widget-body {
+  top: 0;
+}

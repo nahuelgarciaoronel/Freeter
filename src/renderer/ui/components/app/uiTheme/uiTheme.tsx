@@ -4,21 +4,19 @@
  */
 
 import { useEffect } from 'react';
-import { UiThemeId } from '@/base/uiTheme';
-import { uiThemes } from '@/ui/components/app/uiTheme/themes';
+import { getThemeById } from '@/ui/components/app/uiTheme/themes';
 
 export interface UIThemeProps {
-  themeId: UiThemeId;
+  themeId: string;
 }
 
 export const UITheme = ({
   themeId
 }: UIThemeProps) => {
   useEffect(() => {
-    const theme = uiThemes[themeId];
-    Object.keys(theme).forEach((key) => {
-      const value = theme[key as keyof typeof theme];
-      document.documentElement.style.setProperty(`--freeter-${key}`, value);
+    const tokens = getThemeById(themeId);
+    Object.keys(tokens).forEach((key) => {
+      document.documentElement.style.setProperty(`--freeter-${key}`, tokens[key]);
     });
   }, [themeId])
   return <></>;

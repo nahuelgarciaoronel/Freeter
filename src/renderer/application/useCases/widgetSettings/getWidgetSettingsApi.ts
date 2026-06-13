@@ -6,6 +6,7 @@
 import { WidgetSettingsApi } from '@/base/widgetApi';
 import { AppStore } from '@/application/interfaces/store';
 import { DialogProvider } from '@/application/interfaces/dialogProvider';
+import { ShellProvider } from '@/application/interfaces/shellProvider';
 import { modalScreensStateActions } from '@/base/state/actions';
 import { WidgetSettings } from '@/base/widget';
 import { OpenAppManagerUseCase } from '@/application/useCases/appManager/openAppManager';
@@ -13,12 +14,14 @@ import { OpenAppManagerUseCase } from '@/application/useCases/appManager/openApp
 interface Deps {
   appStore: AppStore;
   dialogProvider: DialogProvider;
+  shellProvider: ShellProvider;
   openAppManagerUseCase: OpenAppManagerUseCase;
 }
 
 export function createGetWidgetSettingsApiUseCase({
   appStore,
   dialogProvider,
+  shellProvider,
   openAppManagerUseCase,
 }: Deps) {
   function getWidgetSettingsApiUseCase() {
@@ -46,6 +49,7 @@ export function createGetWidgetSettingsApiUseCase({
         showAppManager: () => openAppManagerUseCase(),
         showOpenDirDialog: cfg => dialogProvider.showOpenDirDialog(cfg),
         showOpenFileDialog: cfg => dialogProvider.showOpenFileDialog(cfg),
+        readFileAsDataUrl: path => shellProvider.readFileAsDataUrl(path),
       }
     }
     return settingsApi;

@@ -9,6 +9,7 @@ export function fixtureSettings(settings: Partial<Settings>): Settings {
   return {
     cmds: ['test-cmd1', 'test-cmd2'],
     cwd: 'test/dir',
+    customIconDataUrl: '',
     ...settings
   }
 }

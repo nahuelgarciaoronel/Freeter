@@ -28,7 +28,8 @@ function setup() {
   const shellProvider = mockShellProvider({
     openApp: jest.fn(),
     openExternal: jest.fn(),
-    openPath: jest.fn()
+    openPath: jest.fn(),
+    getFileIcon: jest.fn(),
   });
 
   const widgetDataStorage: jest.MockedObject<DataStorageRenderer> = {
@@ -225,6 +226,10 @@ describe('getWidgetApiUseCase()', () => {
     widgetApi.shell.openPath('some/file/path');
     expect(shellProvider.openPath).toHaveBeenCalledTimes(1);
     expect(shellProvider.openPath).toHaveBeenCalledWith('some/file/path');
+
+    widgetApi.shell.getFileIcon('some/file/path.lnk');
+    expect(shellProvider.getFileIcon).toHaveBeenCalledTimes(1);
+    expect(shellProvider.getFileIcon).toHaveBeenCalledWith('some/file/path.lnk');
   })
 
   it('should correctly setup terminal module', () => {

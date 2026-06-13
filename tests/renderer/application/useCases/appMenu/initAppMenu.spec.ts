@@ -36,6 +36,8 @@ async function setup(initState: AppState, opts?: {
   const openAboutUseCase = jest.fn();
   const openAppManagerUseCase = jest.fn();
   const openProjectManagerUseCase = jest.fn();
+  const exportSettingsUseCase = jest.fn();
+  const importSettingsUseCase = jest.fn();
   const initAppMenuUseCase = createInitAppMenuUseCase({
     appStore,
     appMenu: appMenuProviderMock,
@@ -50,6 +52,8 @@ async function setup(initState: AppState, opts?: {
     openAboutUseCase,
     openAppManagerUseCase,
     openProjectManagerUseCase,
+    exportSettingsUseCase,
+    importSettingsUseCase
   });
   return {
     appStore,

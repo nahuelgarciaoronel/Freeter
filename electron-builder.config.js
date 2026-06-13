@@ -10,6 +10,13 @@ module.exports = {
     to: './',
     filter: ['package.json']
   }],
+  extraResources: [{
+    from: './themes',
+    to: './themes'
+  }, {
+    from: './user_config',
+    to: './user_config'
+  }],
   mac: {
     category: 'public.app-category.productivity',
     target: [

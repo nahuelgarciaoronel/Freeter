@@ -164,6 +164,7 @@ export function createWidgetViewModelHook({
     ), [env.isPreview, maximizeAction, widget.id, widgetType?.maximizable, widgetType?.requiresApi])
 
     const widgetName = getWidgetDisplayName(widget, widgetType);
+    const hideTitle = !!widget.coreSettings.hideTitle;
 
     const actionBarItems: ActionBarItems = useMemo(
       () => editMode
@@ -190,6 +191,7 @@ export function createWidgetViewModelHook({
       env,
       widget,
       widgetName,
+      hideTitle,
       widgetApi,
       WidgetComp,
       sharedState,

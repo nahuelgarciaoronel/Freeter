@@ -3,20 +3,22 @@
  * GNU General Public License v3.0 or later (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
  */
 
-import { Button, CreateSettingsState, List, ReactComponent, SettingsEditorReactComponentProps, addItemToList, delete14Svg, removeItemFromList, SettingBlock, SettingRow, SettingActions } from '@/widgets/appModules';
+import { Button, CreateSettingsState, List, ReactComponent, SettingsEditorReactComponentProps, addItemToList, browse14Svg, delete14Svg, removeItemFromList, SettingBlock, SettingRow, SettingActions } from '@/widgets/appModules';
 import { useLayoutEffect, useRef } from 'react';
 
 export interface Settings {
   urls: List<string>,
+  customIconDataUrl: string;
 }
 
 export const createSettingsState: CreateSettingsState<Settings> = (settings) => ({
   urls: Array.isArray(settings.urls) ? settings.urls.map(path=>typeof path==='string'?path:'') : [''],
+  customIconDataUrl: typeof settings.customIconDataUrl === 'string' ? settings.customIconDataUrl : ''
 })
 
 function SettingsEditorComp({settings, settingsApi}: SettingsEditorReactComponentProps<Settings>) {
   const urlRefs = useRef<Array<HTMLInputElement|null>>([]);
-  const {updateSettings} = settingsApi;
+  const {updateSettings, dialog} = settingsApi;
   const shouldFocusLastUrlRef = useRef(false);
 
   const triggerLastUrlFocus = () => {
@@ -76,6 +78,46 @@ function SettingsEditorComp({settings, settingsApi}: SettingsEditorReactComponen
             primary={true}
           ></Button>
         </div>
+      </SettingBlock>
+
+      <SettingBlock
+        titleForId='link-opener-icon'
+        title='Custom Icon'
+        moreInfo='Select an image (PNG, SVG, ICO) to use as the widget icon.'
+      >
+        <SettingRow>
+          <Button
+            onClick={async () => {
+              const { canceled, filePaths } = await dialog.showOpenFileDialog({
+                title: 'Select Icon Image',
+                filters: [{ name: 'Images', extensions: ['png', 'svg', 'ico', 'jpg', 'jpeg', 'webp'] }],
+                multiSelect: false
+              });
+              if (!canceled && filePaths[0]) {
+                const dataUrl = await dialog.readFileAsDataUrl(filePaths[0]);
+                updateSettings({ ...settings, customIconDataUrl: dataUrl });
+              }
+            }}
+            caption={settings.customIconDataUrl ? 'Change Icon' : 'Select Icon'}
+            iconSvg={browse14Svg}
+          />
+          {settings.customIconDataUrl && (
+            <Button
+              onClick={() => updateSettings({ ...settings, customIconDataUrl: '' })}
+              caption='Remove'
+              iconSvg={delete14Svg}
+            />
+          )}
+        </SettingRow>
+        {settings.customIconDataUrl && (
+          <div style={{ marginTop: '8px', textAlign: 'center' }}>
+            <img
+              src={settings.customIconDataUrl}
+              alt="Custom icon preview"
+              style={{ maxWidth: '48px', maxHeight: '48px', objectFit: 'contain' }}
+            />
+          </div>
+        )}
       </SettingBlock>
     </>
   )

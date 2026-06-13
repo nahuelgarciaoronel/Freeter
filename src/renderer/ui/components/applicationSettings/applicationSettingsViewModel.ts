@@ -9,9 +9,10 @@ import { SaveApplicationSettingsUseCase } from '@/application/useCases/applicati
 import { UpdateApplicationSettingsUseCase } from '@/application/useCases/applicationSettings/updateApplicationSettings';
 import { AppConfig } from '@/base/appConfig';
 import { memSaverConfigAppActivateOnProjectSwitchOptions, memSaverConfigAppInactiveAfterOptions } from '@/base/memSaver';
-import { uiThemes } from '@/base/uiTheme';
+import { getUiThemeOptions } from '@/base/uiTheme';
 import { UseAppState } from '@/ui/hooks/appState';
 import { useCallback } from 'react';
+import { keyboardShortcutDefs, resolveShortcutAccelerator } from '@/base/keyboardShortcuts';
 
 type Deps = {
   useAppState: UseAppState;
@@ -29,7 +30,7 @@ export function createApplicationSettingsViewModelHook({
   closeApplicationSettingsUseCase,
 }: Deps) {
   const hotkeyOptions = getMainHotkeyOptionsUseCase();
-  const uiThemeOptions = uiThemes;
+  const uiThemeOptions = getUiThemeOptions();
   const inactiveAfterOptions = memSaverConfigAppInactiveAfterOptions;
   const activateOnProjectSwitchOptions = memSaverConfigAppActivateOnProjectSwitchOptions;
 
@@ -44,6 +45,23 @@ export function createApplicationSettingsViewModelHook({
       updateApplicationSettingsUseCase(newAppConfig);
     }, [])
 
+    const updateShortcut = useCallback((shortcutId: string, accelerator: string) => {
+      if (!appConfig) {
+        return;
+      }
+      const nextOverrides = {
+        ...appConfig.shortcuts,
+        [shortcutId]: accelerator
+      };
+      if (!accelerator) {
+        delete nextOverrides[shortcutId];
+      }
+      updateSettings({
+        ...appConfig,
+        shortcuts: nextOverrides
+      });
+    }, [appConfig, updateSettings]);
+
     const onOkClickHandler = useCallback(() => {
       saveApplicationSettingsUseCase();
     }, []);
@@ -52,15 +70,24 @@ export function createApplicationSettingsViewModelHook({
       closeApplicationSettingsUseCase();
     }, []);
 
+    const keyboardShortcuts = keyboardShortcutDefs.map(def => ({
+      id: def.id,
+      label: def.label,
+      scope: def.scope,
+      value: resolveShortcutAccelerator(def.id, appConfig?.shortcuts)
+    }));
+
     return {
       appConfig,
       hotkeyOptions,
       updateSettings,
+      updateShortcut,
       onOkClickHandler,
       onCancelClickHandler,
       uiThemeOptions,
       inactiveAfterOptions,
-      activateOnProjectSwitchOptions
+      activateOnProjectSwitchOptions,
+      keyboardShortcuts
     }
   }
 

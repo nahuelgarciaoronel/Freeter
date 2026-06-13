@@ -5,6 +5,7 @@
 
 import { CoreSettingsProps, useCoreSettingsViewModel } from '@/ui/components/widgetSettings/coreSettings/coreSettingsViewModel';
 import { SettingBlock } from '@/widgets/appModules';
+import { convertBoolToStr, convertStrToBool } from '@/base/convTypes';
 
 export function CoreSettings(props: CoreSettingsProps) {
   const {
@@ -21,6 +22,20 @@ export function CoreSettings(props: CoreSettingsProps) {
         ...coreSettings,
         name: e.target.value
       })}/>
+    </SettingBlock>
+    <SettingBlock
+      titleForId='hide-title'
+      title='Hide Title'
+      moreInfo='When turned on, the widget title bar is hidden to maximize screen space.
+                It remains accessible in Edit Mode so you can still open the widget settings.'
+    >
+      <select id="hide-title" value={convertBoolToStr(!!coreSettings.hideTitle)} onChange={e => updateCoreSettings({
+        ...coreSettings,
+        hideTitle: convertStrToBool(e.target.value)
+      })}>
+        <option value={convertBoolToStr(false)}>No</option>
+        <option value={convertBoolToStr(true)}>Yes</option>
+      </select>
     </SettingBlock>
   </>)
 }
